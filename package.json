@@ -1,0 +1,12 @@
+{
+  "name": "@ruptor/tailwind",
+  "version": "0.1.0",
+  "author": "Kevin Yang",
+  "license": "MIT",
+  "dependencies": {
+    "tailwindcss": "^2.2.4", 
+    "fs-extra": "^9.0.1"
+  },
+  "type": "module",
+  "main": "index.js"
+}
