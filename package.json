@@ -1,6 +1,6 @@
 {
   "name": "@ruptor/tailwind",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Tailwind extension for Ruptor",
   "repository": "https://github.com/ruptorjs/ruptor-tailwind",
   "author": "Kevin Yang",

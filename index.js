@@ -10,7 +10,7 @@ const jsConfig = 'tailwind.config.js';
 
 let cssFile = null;
 let cssCompiledFile = null;
-let cssCompiledFilename = 'style.dev.css';
+let cssCompiledFilename = null;
 let log = null;
 let isExporting = false;
 let projectRoot = null;
@@ -21,24 +21,25 @@ let lastCompiledCSS = '';
 
 
 export async function initExport() {
-  cssCompiledFilename = 'style.css';  
   isExporting = true;
 }
 
 
-
 export async function init({request, head, log: _log, watch}) {
   log = _log;
+  cssCompiledFilename = isExporting ? 'style.css' : 'style.dev.css';  
+  
   const cssCompiledURL = await request('asset', cssCompiledFilename);
   const project = await request('project');
+  const extensionOptions = await request('extensionOptions');
   
   componentsDir = project.componentsDir;
   pagesDir = project.pagesDir;
   projectRoot = project.rootDir;
   cssFile = path.join(project.rootDir, 'tailwind.css');
-  cssCompiledFile = path.join(project.assetsDir, cssCompiledFilename);
+  cssCompiledFile = path.join(isExporting ? project.exportAssetsDir : project.assetsDir, cssCompiledFilename);
   
-  injectToHead = () => head('link', {rel: 'stylesheet', href: cssCompiledURL});
+  injectToHead = () => head('link', {rel: 'stylesheet', href: cssCompiledURL}, undefined, extensionOptions?.pageFilter);
   injectToHead();
   
   if (!isExporting) {
