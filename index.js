@@ -1,7 +1,5 @@
 import postcss from 'postcss';
 import tailwind from 'tailwindcss';
-import path from 'path';
-import fs from 'fs-extra';
 import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
 
@@ -12,6 +10,8 @@ let cssFile = null;
 let cssCompiledFile = null;
 let cssCompiledFilename = null;
 let log = null;
+let fs = null;
+let path = null;
 let isExporting = false;
 let projectRoot = null;
 let componentsDir = undefined;
@@ -20,13 +20,16 @@ let injectToHead = null;
 let lastCompiledCSS = '';
 
 
+
 export async function initExport() {
   isExporting = true;
 }
 
 
-export async function init({request, head, log: _log, watch}) {
+export async function init({request, head, log: _log, watch, util}) {
   log = _log;
+  fs = util.fs;
+  path = util.path;
   cssCompiledFilename = isExporting ? 'style.css' : 'style.dev.css';  
   
   const cssCompiledURL = await request('asset', cssCompiledFilename);
@@ -58,7 +61,7 @@ export async function afterExport({request}) {
   const project = await request('project');
   let config = {};
   try {
-    const configFile = getConfigFile();
+    const configFile = await getConfigFile();
     const configModule = await import(configFile);
     config = configModule.default;
   } catch (error) {
@@ -77,14 +80,14 @@ function compile(config = undefined) {
   return new Promise(async (resolve, reject) => {
     let css = '';
     try {
-      css = fs.readFileSync(cssFile, 'utf8');
+      css = await fs.readFile(cssFile, 'utf8');
     } catch (error) {
       // Create basic tailwind css file if it doesn't already exist
       css = '@tailwind base;@tailwind components;@tailwind utilities;';
     }
     
     if (!config) {
-      config = getConfigFile() || undefined;
+      config = await getConfigFile() || undefined;
       if (config) {
         try {
           // CJS bust cache by deleting require.cache object
@@ -119,11 +122,11 @@ function compile(config = undefined) {
     
     postcss([tailwind({config})])
       .process(css, {from: undefined})
-      .then(result => {
+      .then(async result => {
         if (result.css !== lastCompiledCSS) {
           lastCompiledCSS = result.css;
           log(`Writing ${cssCompiledFilename}`);
-          fs.outputFileSync(cssCompiledFile, result.css);
+          await fs.outputFile(cssCompiledFile, result.css);
           injectToHead();
         }
         resolve({css: result.css});
@@ -133,11 +136,11 @@ function compile(config = undefined) {
   });
 }
 
-function getConfigFile() {
+async function getConfigFile() {
   // .js then .cjs
   let file = path.join(projectRoot, jsConfig);
-  if (fs.existsSync(file)) { return file }
+  if (await fs.pathExists(file)) { return file }
   file = path.join(projectRoot, cjsConfig);
-  if (fs.existsSync(file)) { return file }
+  if (await fs.pathExists(file)) { return file }
   return null;
 }

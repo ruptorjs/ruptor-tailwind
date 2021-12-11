@@ -6,8 +6,7 @@
   "author": "Kevin Yang",
   "license": "MIT",
   "dependencies": {
-    "tailwindcss": "^2.2.4", 
-    "fs-extra": "^9.0.1"
+    "tailwindcss": "^2.2.4"
   },
   "type": "module",
   "main": "index.js"
