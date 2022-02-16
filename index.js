@@ -50,8 +50,8 @@ export async function init({request, head, log: _log, watch, util}) {
     if (cssCompiledFilename !== 'style.css') {
       watch(path.join(projectRoot, cjsConfig), () => compile());
       watch(path.join(projectRoot, jsConfig), () => compile());
-      watch(componentsDir, ({path: filePath}) => filePath.endsWith('.svelte') && compile());
-      watch(pagesDir, ({path: filePath}) => {(filePath.endsWith('.md') || filePath.endsWith('.html')) && compile()});
+      watch(componentsDir, ({path: filePath}) => (filePath.endsWith('.svelte') || filePath.endsWith('.js')) && compile());
+      watch(pagesDir, ({path: filePath}) => {(filePath.endsWith('.md') || filePath.endsWith('.html') || filePath.endsWith('.json')) && compile()});
       watch(cssFile, () => compile());
     }
   }
@@ -67,11 +67,10 @@ export async function afterExport({request}) {
   } catch (error) {
   }
   
-  config.mode = 'jit';
-  config.purge = [
-    project.exportDir + '/**/*.html',
-    project.exportDir + '/**/*.js',
+  config.content = [
+    project.exportDir + '/**/*.{html,js}',
   ];
+  
   
   await compile(config);
 }
@@ -112,12 +111,10 @@ function compile(config = undefined) {
       
       // Append a new date to config to force Tailwind JIT to recompile and parse all files
       config._ = Date.now();
-      config.mode = 'jit';
-      config.purge = [
-        componentsDir + '/**/*.svelte',
-        pagesDir + '/**/*.html',
-        pagesDir + '/**/*.md',
-      ]
+      config.content = [
+        componentsDir + '/**/*.{svelte,js}',
+        pagesDir + '/**/*.{json,html,md}',
+      ];
     }
     
     postcss([tailwind({config})])

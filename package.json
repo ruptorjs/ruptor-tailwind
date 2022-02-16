@@ -1,12 +1,12 @@
 {
   "name": "@ruptor/tailwind",
-  "version": "0.3.0",
-  "description": "Tailwind extension for Ruptor",
+  "version": "0.4.0",
+  "description": "Ruptor extension for Tailwind CSS",
   "repository": "https://github.com/ruptorjs/ruptor-tailwind",
   "author": "Kevin Yang",
   "license": "MIT",
   "dependencies": {
-    "tailwindcss": "^2.2.4"
+    "tailwindcss": "^3.0.6"
   },
   "type": "module",
   "main": "index.js"
